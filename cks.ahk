@@ -3,7 +3,7 @@
 #InstallKeybdHook
 #InstallMouseHook
 
-Gui, Add, Checkbox, Section x10 gMouseListen vMouseEnabled, Listen to mouse
+Gui, Add, Checkbox, Section x10 gMouseToggle vMouseEnabled, Listen to mouse
 Gui, Add, Checkbox, xs gKbdListen vKbdEnabled, Listen to keyboard
 Gui, Add, Checkbox, xs gPhsListen vPhsEnabled, Listen to user input
 Gui, Add, Checkbox, ys vMimic Section, Mimic input 
@@ -14,7 +14,7 @@ Gui, Add, Button, gHelpListen xs w60, Help
 Gui, Add, Text, xs, Pause button
 Gui, Add, Button, Section gPauseListen ys w60 vPauseButton Default, Pause
 Gui, Add, Button, gCoordsListen xs w60, CoordSpy
-Gui, Add, edit, xs vPauseKey gEditChange w50
+Gui, Add, Edit, xs vPauseKey gEditChange w50
 Gui, Add, Checkbox, ys gAutoRef vAutoEnabled Section, AutoRefresh each
 Gui, Add, ComboBox, ys vSecToRef w50, 1|2|3|4|5|6|7|8|9|10||
 Gui, Add, Text, ys, sec
@@ -25,7 +25,7 @@ Gui, Add, ComboBox, ys vRandEnd w50, 0.5|1|1.5|2|2.5|3||3.5|4|4.5|5
 Gui, Add, Text, ys, s
 Gui, Add, Button, ys, Apply
 Gui, Add, Text, xs Section, Keys to send
-Gui, Add, edit, ys vKeys w150
+Gui, Add, Edit, ys vKeys w150
 Gui, Add, ListView, vMyList gMyList w600 h300 Checked SortDesc xm, Name|Class|ID
 Menu, FileMenu, Add, LoadProfile(inactive), MenuHandler
 Menu, FileMenu, Add, SaveProfile(inactive), MenuHandler
@@ -64,8 +64,6 @@ Seq := 0
 Timer := 0
 Gui, Show,, CKS-E
 Gui, Submit, NoHide
-ListVars
-Pause
 Return
 
 
@@ -76,14 +74,14 @@ MenuHandler(){
 EditChange(){
 	Gui submit, NoHide
 	if (OldPause = PauseKey)
-		return
+		Return
 
 	if (OldPause != "") {
 		Hotkey, %OldPause%, Off
 	}
 
 	if (PauseKey = "" )
-		return
+		Return
 
 	Hotkey, %PauseKey%, PauseListen
 	OldPause := PauseKey
@@ -109,7 +107,7 @@ WatchCursor(){
 }
 
 KbdListen(){
-	global
+	Global
 	Gui, Submit, NoHide
 	while (KbdEnabled)
 	{
@@ -136,7 +134,7 @@ PhsListen(){
 }
 
 PauseListen(){
-	global
+	Global
 	if IsPaused
 	{
 	   Pause off
@@ -149,7 +147,7 @@ PauseListen(){
 }
 
 OnPause(){
-	global
+	Global
 	SetTimer, OnPause, off
 	IsPaused := true
 	GuiControl,, PauseButton, Unpause
@@ -170,8 +168,10 @@ HelpListen(){
 }
 
 AutoRef(){
-	while (AutoEnabled)
-	{
+	
+	Global idList, AutoEnabled, SecToRef
+	
+	while (AutoEnabled){
 		Refresh(idList)
 		if (secToRef="") {
 			SecToRef := 10000
@@ -184,44 +184,55 @@ AutoRef(){
 	Return
 }
 
-OnMouseInput(){
-	global IsPaused, MouseEnabled
+MouseToggle(){
+	Global MouseEnabled
 	
-	if( !IsPaused and MouseEnabled )
-	{
+	Gui, Submit, NoHide
+	
+	if( MouseEnabled ){
+		SetTimer, MouseListen, -0
+	}
+	Return
+}
+
+OnMouseInput(){
+	Global IsPaused, MouseEnabled
+	
+	if( !IsPaused and MouseEnabled ){
 		doSend()
 	}
+	Return
 }
 
 $~WheelUp::
 	OnMouseInput()
-return
+Return
 
 $~WheelDown::
 	OnMouseInput()
-return
+Return
 
 MouseListen(){
-	global Keys, Seq, SequenceEnabled, RandStart, RandEnd, RandEnabled, MouseEnabled
-	Gui, Submit, NoHide
-	MouseGetPos , xPos , yPos
+	Global MouseEnabled
 	
-	while (MouseEnabled)
-	{
-		MouseGetPos , xPosNew , yPosNew
-		if (xPos <> xPosNew or yPos <> yPosNew)
-		{
+	MouseGetPos, xPos, yPos
+	
+	while( MouseEnabled ){
+	
+		MouseGetPos, xPosNew, yPosNew
+		
+		if (xPos <> xPosNew or yPos <> yPosNew){
 			xPos := xPosNew
 			yPos := yPosNew
 			OnMouseInput()
 		}else{
-			sleep, 100
+			Sleep, 100
 		}
 	}
 }
 
 RefreshList(){
-	global idList
+	Global idList
 	Refresh(idList)
 	Return
 }
@@ -241,7 +252,7 @@ Close(){
 }
 
 FinaliseAndExit(){
-	global
+	Global
 	Gui submit, NoHide
 	IniWrite, %SecToRef%, CKSSettings.ini , 1, SecToRef
 	IniWrite, %RandStart%, CKSSettings.ini , 1, RandStart
@@ -252,7 +263,7 @@ FinaliseAndExit(){
 }
 
 doSend(){
-	global Keys, Seq, SequenceEnabled, RandStart, RandEnd, RandEnabled
+	Global Keys, Seq, SequenceEnabled, RandStart, RandEnd, RandEnabled
 	
 	sendKeys(Keys, Seq++, SequenceEnabled)
 	sleepSpecial(RandStart, RandEnd, RandEnabled)
@@ -311,7 +322,7 @@ sleepSpecial(RandStart, RandEnd, RandEnabled){
     }
     Random, rand, RandStart, RandEnd
     sleep , rand
-    return rand
+    Return rand
 }
 
 sendKeys(Keys, Sequence, SEnabled){

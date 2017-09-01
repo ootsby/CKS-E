@@ -2,12 +2,12 @@
 #NoEnv
 #InstallKeybdHook
 #InstallMouseHook
+#MaxHotKeysPerInterval 10000
 
 Gui, Add, Checkbox, Section x10 gMouseToggle vMouseEnabled, Listen to mouse
 Gui, Add, Checkbox, xs gKbdListen vKbdEnabled, Listen to keyboard
 Gui, Add, Checkbox, xs gPhsListen vPhsEnabled, Listen to user input
-Gui, Add, Checkbox, ys vMimic Section, Mimic input 
-Gui, Add, Checkbox, xs vRandEnabled, Random events
+Gui, Add, Checkbox, ys vMimic Section, Mimic input
 Gui, Add, Checkbox, xs vSequenceEnabled, Sequence send
 Gui, Add, Button, Section gRefreshList ys w60, Refresh
 Gui, Add, Button, gHelpListen xs w60, Help
@@ -62,6 +62,7 @@ OldPause := PauseKeyTemp
 Hotkey, %PauseKeyTemp%, PauseListen
 Seq := 0
 Timer := 0
+NextAllowedOutputTime := 0
 Gui, Show,, CKS-E
 Gui, Submit, NoHide
 Return
@@ -226,7 +227,7 @@ MouseListen(){
 			yPos := yPosNew
 			OnMouseInput()
 		}else{
-			Sleep, 100
+			Sleep, 50
 		}
 	}
 }
@@ -263,10 +264,12 @@ FinaliseAndExit(){
 }
 
 doSend(){
-	Global Keys, Seq, SequenceEnabled, RandStart, RandEnd, RandEnabled
+	Global Keys, Seq, SequenceEnabled, RandStart, RandEnd, RandEnabled, NextAllowedOutputTime
 	
-	sendKeys(Keys, Seq++, SequenceEnabled)
-	sleepSpecial(RandStart, RandEnd, RandEnabled)
+	If( A_TickCount >= NextAllowedOutputTime ){
+		sendKeys(Keys, Seq++, SequenceEnabled)
+		sleepSpecial(RandStart, RandEnd, RandEnabled)
+	}
 }
 
 Refresh(idList) {
@@ -300,7 +303,9 @@ Refresh(idList) {
 }
 
 sleepSpecial(RandStart, RandEnd, RandEnabled){
-
+	
+	Global NextAllowedOutputTime
+	
     If (RandEnd < RandStart or RandEnd ="" or RandStart="") {
         RandStart := 2000
         RandEnd := 3000
@@ -311,17 +316,8 @@ sleepSpecial(RandStart, RandEnd, RandEnabled){
         RandEnd *=1000
     }
 
-    if (RandEnabled) {
-        Random, spec, 1, 10
-        if (spec = 1) {
-            randEventArr := [0.1, 0.5, 0.7, 2, 3, 4, 5]
-            Random, modif, 1 ,7
-            RandStart *= randEventArr[modif]
-            RandEnd *= randEventArr[modif]
-        }
-    }
     Random, rand, RandStart, RandEnd
-    sleep , rand
+    NextAllowedOutputTime := A_TickCount + rand
     Return rand
 }
 

@@ -1,3 +1,4 @@
+#Include %A_ScriptDir%\lib\AHKsock\AHKsock.ahk
 #SingleInstance force
 #NoEnv
 #InstallKeybdHook
@@ -5,19 +6,19 @@
 #MaxHotKeysPerInterval 10000
 
 Gui, Add, Checkbox, Section x10 gMouseToggle vMouseEnabled, Listen to mouse
-Gui, Add, Checkbox, xs gKbdListen vKbdEnabled, Listen to keyboard
-Gui, Add, Checkbox, xs gPhsListen vPhsEnabled, Listen to user input
-Gui, Add, Checkbox, ys vMimic Section, Mimic input
+Gui, Add, Checkbox, xs gKbdToggle vKbdEnabled, Listen to keyboard
+Gui, Add, Checkbox, xs gJoyToggle vJoyEnabled, Listen to joypad
+Gui, Add, Checkbox, xs gPhsToggle vPhsEnabled, Listen to user input
+Gui, Add, Checkbox, ys gMimicToggle vMimic Section, Mimic input
 Gui, Add, Checkbox, xs vSequenceEnabled, Sequence send
 Gui, Add, Button, Section gRefreshList ys w60, Refresh
-Gui, Add, Button, gHelpListen xs w60, Help
 Gui, Add, Text, xs, Pause button
 Gui, Add, Button, Section gPauseListen ys w60 vPauseButton Default, Pause
 Gui, Add, Button, gCoordsListen xs w60, CoordSpy
 Gui, Add, Edit, xs vPauseKey gEditChange w50
-Gui, Add, Checkbox, ys gAutoRef vAutoEnabled Section, AutoRefresh each
-Gui, Add, ComboBox, ys vSecToRef w50, 1|2|3|4|5|6|7|8|9|10||
-Gui, Add, Text, ys, sec
+ ; Gui, Add, Checkbox, ys gAutoRef vAutoEnabled Section, AutoRefresh each
+ ; Gui, Add, ComboBox, ys vSecToRef w50, 1|2|3|4|5|6|7|8|9|10||
+ ; Gui, Add, Text, ys, sec
 Gui, Add, Text, xs Section, Random interval 
 Gui, Add, ComboBox, ys vRandStart gRandStartUpdated w50, 0.5|1|1.5|2||2.5|3|3.5|4|4.5|5
 Gui, Add, Text, ys, -
@@ -55,6 +56,15 @@ GuiControl,, RandStart, %RandStartTemp%||
 GuiControl,, RandEnd, %RandEndTemp%||
 GuiControl,, Keys, %KeysTemp%
 GuiControl,, PauseKey, %PauseKeyTemp%
+
+;Set up an error handler (this is optional)
+AHKsock_ErrorHandler("AHKsockErrors")
+    
+;Set up an OnExit routine
+OnExit, GuiClose
+
+;Set default value to invalid handle
+iPeerSocket := -1
 
 idList := object()
 Refresh(idList)
@@ -107,9 +117,24 @@ WatchCursor(){
 	Return
 }
 
+KbdToggle(){
+	Global KbdEnabled
+	
+	Gui, Submit, NoHide
+	
+	if( KbdEnabled ){
+		SetTimer, KbdListen, -0
+	}
+	Return
+}
+
+MimicToggle(){
+	Gui, Submit, NoHide
+}
+
 KbdListen(){
 	Global
-	Gui, Submit, NoHide
+	
 	while (KbdEnabled)
 	{
 		Input, SingleKey, L1 V,  {LControl}{RControl}{LAlt}{RAlt}{LShift}{RShift}{LWin}{RWin}{AppsKey}{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{Backspace}{Capslock}{Numlock}{PrintScreen}{Pause}
@@ -122,14 +147,28 @@ KbdListen(){
 	Return
 }
 
+PhsToggle(){
+	Global PhsEnabled
+	
+	Gui, Submit, NoHide
+	
+	if( PhsEnabled ){
+		SetTimer, PhsListen, -0
+	}
+	Return
+}
+
 PhsListen(){
-	lastInput := 100
+	Global PhsEnabled
+	
+	DetectPeriod := 50
+	
 	while (PhsEnabled)
 	{
-		if (A_TimeIdlePhysical < lastInput) 
-			sendKeys(Keys, Seq++, SequenceEnabled)
-		
-		lastInput := sleepSpecial(RandStart, RandEnd, RandEnabled)
+		if (A_TimeIdlePhysical < DetectPeriod){ 
+			doSend()
+		}
+		Sleep, DetectPeriod
 	}
 	Return
 }

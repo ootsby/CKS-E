@@ -40,18 +40,18 @@ Gui Add, Button, gPauseListen x24 y152 w94 h33, Pause
 Gui Add, Edit, vPauseKey gPauseKeyChanged x256 y160 w79 h24, #p
 Gui Add, Text, x430 y10 w123 h20, Output Interval
 Gui Add, Text, cRed x560 y8 Hidden vOutputIntervalLowError, !
-Gui Add, ComboBox, vOutputIntervalLow gIntervalsUpdated x568 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10|0.5
+Gui Add, ComboBox, vOutputIntervalLow gIntervalsUpdated x568 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10
 Gui Add, Text, cRed x664 y8 Hidden vOutputIntervalHighError, !
-Gui Add, ComboBox, vOutputIntervalHigh gIntervalsUpdated x672 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10|1.5
+Gui Add, ComboBox, vOutputIntervalHigh gIntervalsUpdated x672 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10
 Gui Add, Text, x430 y88 w96 h20, Keys to send
 Gui Add, Edit, vKeys x568 y88 w235 h23, 1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1
 Gui Add, ListView, vProgramList gProgramList x24 y240 w938 h469 Checked SortDesc xm, Name|Class|ID
 Gui Add, CheckBox, vJoypadEnabled gJoypadToggle x24 y104 w150 h20, Listen to joypad
 Gui Add, Text, x410 y50 w145 h20, KeyPress Length
 Gui Add, Text, cRed x560 y48 Hidden vKeypressLengthLowError, !
-Gui Add, ComboBox, vKeypressLengthLow gIntervalsUpdated x568 y48 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10|0.5
+Gui Add, ComboBox, vKeypressLengthLow gIntervalsUpdated x568 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
 Gui Add, Text, cRed x664 y48 Hidden vKeypressLengthHighError, !
-Gui Add, ComboBox, vKeypressLengthHigh gIntervalsUpdated x672 y48 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10|0.5
+Gui Add, ComboBox, vKeypressLengthHigh gIntervalsUpdated x672 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
 Gui Add, Edit, vServerPort gServerPortUpdated x520 y160 w72 h21, 27001
 Gui Add, Text, x512 y128 w80 h24 +0x200, Server Port
 Gui Add, CheckBox, vServerModeEnabled gServerModeUpdated x608 y160 w120 h23, Act As Server
@@ -496,32 +496,47 @@ sendKeys(Keys, Sequence, SEnabled){
     if (Keys = "")
         Keys := 1
     RowNumber := 0  
-    Loop
-    {
+	
+	StringSplit, KeyArr, Keys, `;
+
+	if (SEnabled) {
+		rand := Mod(Sequence, KeyArr0) + 1
+	} else {
+		Random, rand, 1 , KeyArr0
+	}
+
+    keyToSend := keyArr%rand%	
+	
+	; Send key to all checked applications
+    Loop{
         RowNumber := LV_GetNext(RowNumber,"Checked")  
         if not RowNumber  
         break
-        StringSplit, KeyArr, Keys, `;
-        if (SEnabled) {
-			rand := Mod(Sequence, KeyArr0) + 1
-		} else {
-			Random, rand, 1 , KeyArr0
-		}
+        
         LV_GetText(win_id, RowNumber,3)
-        keyToSend := keyArr%rand%
+
 		IfInString, keyToSend, mclick
 		{
 			Stringmid, keyToSend, keyToSend, 8
 			ControlClick, %keytoSend%, ahk_id%win_id%
 		} else{
 			If( KeypressEmulationEnabled ){
-				Random, rand, RealKeypressLengthLow*1000, RealKeypressLengthHigh*1000
 				ControlSend,, {%keytoSend% down}, ahk_id%win_id%
-				Sleep, rand
-				ControlSend,, {%keytoSend% up}, ahk_id%win_id%
 			}Else{
 				ControlSend,, {%keytoSend%}, ahk_id%win_id%
 			}
+		}
+	}
+	
+	; If keypress emulation is enabled then sleep and then send the key up even to each checked application
+	If( KeypressEmulationEnabled ){
+		Random, rand, RealKeypressLengthLow*1000, RealKeypressLengthHigh*1000
+		Sleep, rand
+		Loop{
+			RowNumber := LV_GetNext(RowNumber,"Checked")  
+			if not RowNumber  
+				break
+			ControlSend,, {%keytoSend% up}, ahk_id%win_id%
 		}
 	}
 }

@@ -31,6 +31,7 @@
 Gui Add, CheckBox, vMouseEnabled gMouseToggle x24 y8 w150 h20, Listen to mouse
 Gui Add, CheckBox, vKbdEnabled gKbdToggle x24 y40 w171 h20, Listen to keyboard
 Gui Add, CheckBox, vPhsEnabled gPhsToggle x24 y72 w170 h20, Listen to user input
+Gui Add, CheckBox, vJoypadEnabled gJoypadToggle x24 y104 w150 h20, Listen to joypad
 Gui Add, CheckBox, vMimic gMimicToggle x216 y40 w135 h20, Mirror Keys
 Gui Add, CheckBox, vSequenceEnabled x824 y78 w133 h20, Send In Sequence
 Gui Add, CheckBox, vKeypressEmulationEnabled gKeypressEmuToggle x824 y98 w133 h20, Emulate KeyDown/Up
@@ -46,7 +47,6 @@ Gui Add, ComboBox, vOutputIntervalHigh gIntervalsUpdated x672 y8 w79, 0.2|0.3|0.
 Gui Add, Text, x430 y88 w96 h20, Keys to send
 Gui Add, Edit, vKeys x568 y88 w235 h23, 1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1
 Gui Add, ListView, vProgramList gProgramList x24 y240 w938 h469 Checked SortDesc xm, Name|Class|ID
-Gui Add, CheckBox, vJoypadEnabled gJoypadToggle x24 y104 w150 h20, Listen to joypad
 Gui Add, Text, x410 y50 w145 h20, KeyPress Length
 Gui Add, Text, cRed x560 y48 Hidden vKeypressLengthLowError, !
 Gui Add, ComboBox, vKeypressLengthLow gIntervalsUpdated x568 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
@@ -61,7 +61,6 @@ Gui Add, Edit, vServerIP gServerIPUpdated x368 y160 w120 h21, %A_IPAddress1%
 Gui Add, Button, gApplyIntervals vApplyIntervals x792 y16 w80 h39 Disabled, Apply Intervals
 Gui Add, Text, vAppStatus x24 y200 w935 h23 +0x200 Center, Status Line
 
---Gui, Add, ListView, vProgramList gProgramList w600 h300 Checked SortDesc xm, Name|Class|ID
 Menu, FileMenu, Add, LoadProfile(inactive), MenuHandler
 Menu, FileMenu, Add, SaveProfile(inactive), MenuHandler
 Menu, HelpMenu, Add, Usage, HelpListen
@@ -121,8 +120,62 @@ clientSocket := -1
 windowName := "CKS-E"
 Gui, Show,, %windowName%
 Gui, Submit, NoHide
+JoyPadAxes := Object()
 Return
 
+SetJoyPadListening( OnOrOff ){
+	Global JoyPadAxes
+	
+	If( OnOrOff = "Off" ){
+		JoyPadAxes := Object()
+	}
+	
+	Loop 16 {
+		InputPrefix = %A_Index%Joy
+		
+		GetKeyState, JoyName, %InputPrefix%Name
+        
+		if JoyName <>
+        {
+			GetKeyState, NumButtons, %InputPrefix%Buttons
+		
+			Loop %NumButtons% {
+				Hotkey, %InputPrefix%%A_Index%, OnJoyPadKey, %OnOrOff%
+			}
+			
+			If( OnOrOff = "On" ){
+				GetKeyState, Info, %InputPrefix%JoyInfo
+			
+				axes := Object()
+				axes["X"] := 0
+				axes["Y"] := 0
+				
+				If( InStr(%Info%, Z) ){
+					axes["Z"] := 0
+				}
+				If( InStr(%Info%, R) ){
+					axes["R"] := 0
+				}
+				If( InStr(%Info%, U) ){
+					axes["U"] := 0
+				}
+				If( InStr(%Info%, V) ){
+					axes["V"] := 0
+				}
+				If( InStr(%Info%, P) ){
+					axes["POV"] := 0
+				}
+			
+				JoyPadAxes[InputPrefix] := axes
+			}
+		}
+	}
+}
+
+OnJoyPadKey(){
+	Global
+	sendKeys(Keys, Seq++, SequenceEnabled)
+}
 
 GuiClose(){
     
@@ -274,24 +327,45 @@ HelpListen(){
 	Return
 }
 
-AutoRef(){
+JoyPadToggle(){
+	Global JoyPadEnabled
 	
-	Global idList, AutoEnabled, SecToRef
+	Gui, Submit, NoHide
 	
-	while (AutoEnabled){
-		Refresh(idList)
-		if (secToRef="") {
-			SecToRef := 10000
-			GuiControl,,SecToRef,10||
-		} else {
-			secToRef*=1000    
-		}
-		sleep, SecToRef
+	If( JoyPadEnabled ){
+		SetJoyPadListening( "On" )
+		SetTimer, JoyPadListen, -0
+	}Else{
+		SetJoyPadListening( "Off" )
 	}
-	Return
 }
 
-JoyPadToggle(){
+JoyPadListen(){
+	Global IsPaused, JoyPadEnabled, JoyPadAxes
+	
+	While( JoyPadEnabled ){
+		
+		JoyPadMoved := False
+		
+		For JoyPadID, Axes in JoyPadAxes
+		{
+			For Axis, LastValue in Axes
+			{
+				GetKeyState, NewValue, %JoyPadID%%Axis%
+			
+				If( NewValue <> LastValue ){
+					JoyPadMoved := True
+				}
+				Axes[Axis] := NewValue
+			}
+		}
+		
+		If( JoyPadMoved and !IsPaused ){
+			doSend()
+		}
+		
+		Sleep, 50
+	}
 }
 
 MouseToggle(){
@@ -335,9 +409,9 @@ MouseListen(){
 			xPos := xPosNew
 			yPos := yPosNew
 			OnMouseInput()
-		}else{
-			Sleep, 50
 		}
+	
+		Sleep, 50
 	}
 }
 

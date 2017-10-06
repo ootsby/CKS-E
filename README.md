@@ -33,13 +33,15 @@ I'm not hiding the origin of the application. I've included an attribution and a
 
 **General**
 
+In case you can't find the download link, it's here: https://github.com/ootsby/CKS-E/releases. Finding the link or reading this far is the first test of alpha participation. Congrats.
+
 This is an alpha. That means it's mostly working but not a finished release. I'm putting it out for user testing and feedback. So: 
 
 * Do expect some issues and rough edges. 
 * Do please give feedback via the issues list or on the woweconomy discord tools/addons channel: http://discord.gg/woweconomy
 * Don't rely on this working or staying the same.
 
-I've put notes about some specifics that I'll be looking at altering/improving in future so please have at least a skim before giveing any non-specific feedback about a feature needing improvement. I particularly don't need to know that the UI is too spaced out or misaligned. :)
+I've put notes about some specifics that I'll be looking at altering/improving in future so please have at least a skim before giving any non-specific feedback about a feature needing improvement. I particularly don't need to know that the UI is too spaced out or misaligned. :)
 
 **Listening Options**
 
@@ -69,7 +71,7 @@ Inputs are treated as digital or analogue. Digital inputs are essentially button
 
 How To: 
 
-The client is the computer you want to by detecting your input. The server is the computer you want to be firing keys at another application. The client input listening is defined on the client and the server outputs will be defined by the settings on the server.
+The client is the computer you want to by detecting your input. The server is the computer you want to be firing keys at another application. The client input listening is defined on the client and the server outputs will be defined by the settings on the server. Think of the client as sending a request just like an output keypress (so network requests will be sent as if they were keypresses to a local application and using the same timings) and the server as treating network requests the same as digital inputs.
 
 1. Set the port on client and server to the same number on an open port that isn't in use (I use 29999).
 2. Set the client IP entry to the server's actual IP address.

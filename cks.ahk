@@ -1,5 +1,5 @@
 
- ; Copyright (c) 2017 ootsby
+ ; Copyright (c) 2017 ootsby <ootsby@gmail.com>
  ; 
  ; Permission is hereby granted, free of charge, to any person obtaining
  ; a copy of this software and associated documentation files (the
@@ -28,6 +28,8 @@
 #InstallMouseHook
 #MaxHotKeysPerInterval 10000
 
+APP_VERSION := "0.1 alpha"
+
 Gui Add, CheckBox, vMouseEnabled gMouseToggle x24 y8 w150 h20, Listen to mouse
 Gui Add, CheckBox, vKbdEnabled gKbdToggle x24 y40 w171 h20, Listen to keyboard
 Gui Add, CheckBox, vPhsEnabled gPhsToggle x24 y72 w170 h20, Listen to user input
@@ -40,18 +42,18 @@ Gui Add, Text, x136 y160 w74 h20, Pause Key
 Gui Add, Button, gPauseListen x24 y152 w94 h33, Pause
 Gui Add, Edit, vPauseKey gPauseKeyChanged x256 y160 w79 h24, #p
 Gui Add, Text, x430 y10 w123 h20, Output Interval
-Gui Add, Text, cRed x560 y8 Hidden vOutputIntervalLowError, !
-Gui Add, ComboBox, vOutputIntervalLow gIntervalsUpdated x568 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10
-Gui Add, Text, cRed x664 y8 Hidden vOutputIntervalHighError, !
-Gui Add, ComboBox, vOutputIntervalHigh gIntervalsUpdated x672 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10
+Gui Add, Text, cRed x560 y8 Hidden CBOutputIntervalLowError, !
+Gui Add, ComboBox, vCBOutputIntervalLow gIntervalsUpdated x568 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10
+Gui Add, Text, cRed x664 y8 Hidden CBOutputIntervalHighError, !
+Gui Add, ComboBox, vCBOutputIntervalHigh gIntervalsUpdated x672 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10
 Gui Add, Text, x430 y88 w96 h20, Keys to send
-Gui Add, Edit, vKeys x568 y88 w235 h23, 1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1
+Gui Add, Edit, vKeys x568 y88 w235 h23, 1
 Gui Add, ListView, vProgramList gProgramList x24 y240 w938 h469 Checked SortDesc xm, Name|Class|ID
 Gui Add, Text, x410 y50 w145 h20, KeyPress Length
-Gui Add, Text, cRed x560 y48 Hidden vKeypressLengthLowError, !
-Gui Add, ComboBox, vKeypressLengthLow gIntervalsUpdated x568 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
-Gui Add, Text, cRed x664 y48 Hidden vKeypressLengthHighError, !
-Gui Add, ComboBox, vKeypressLengthHigh gIntervalsUpdated x672 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
+Gui Add, Text, cRed x560 y48 Hidden vCBKeypressLengthLowError, !
+Gui Add, ComboBox, vCBKeypressLengthLow gIntervalsUpdated x568 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
+Gui Add, Text, cRed x664 y48 Hidden vCBKeypressLengthHighError, !
+Gui Add, ComboBox, vCBKeypressLengthHigh gIntervalsUpdated x672 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
 Gui Add, Edit, vServerPort gServerPortUpdated x520 y160 w72 h21, 27001
 Gui Add, Text, x512 y128 w80 h24 +0x200, Server Port
 Gui Add, CheckBox, vServerModeEnabled gServerModeUpdated x608 y160 w120 h23, Act As Server
@@ -61,40 +63,20 @@ Gui Add, Edit, vServerIP gServerIPUpdated x368 y160 w120 h21, %A_IPAddress1%
 Gui Add, Button, gApplyIntervals vApplyIntervals x792 y16 w80 h39 Disabled, Apply Intervals
 Gui Add, Text, vAppStatus x24 y200 w935 h23 +0x200 Center, Status Line
 
-Menu, FileMenu, Add, LoadProfile(inactive), MenuHandler
-Menu, FileMenu, Add, SaveProfile(inactive), MenuHandler
+Menu, FileMenu, Add, LoadProfile, LoadProfile
+Menu, FileMenu, Add, SaveProfile, SaveProfile
 Menu, HelpMenu, Add, Usage, HelpListen
 Menu, HelpMenu, Add, About, AboutBox
 Menu, MyMenuBar, Add, &File, :FileMenu
 Menu, MyMenuBar, Add, &Help, :HelpMenu
 Gui, Menu, MyMenuBar
 
+DefaultConfigFile := "CKS-E_Defaults.ini"
+
 CoordMode, Mouse, Screen
-if A_IsCompiled
+
+If A_IsCompiled
   Menu, Tray, Icon, %A_ScriptFullPath%, -159
-
-IniRead, SecToRefTemp, CKSSettings.ini, 1, SecToRef, 10
-IniRead, RealOutputIntervalLow, CKSSettings.ini, 1, OutputIntervalLow, 0.5
-IniRead, RealOutputIntervalHigh, CKSSettings.ini, 1, OutputIntervalHigh, 1.0
-IniRead, RealKeypressLengthLow, CKSSettings.ini, 1, KeypressLengthLow, 0.3
-IniRead, RealKeypressLengthHigh, CKSSettings.ini, 1, KeypressLengthHigh, 0.6
-IniRead, KeypressEmulationEnabled, CKSSettings.ini, 1, KeypressEmulationEnabled, 0
-IniRead, KeysTemp, CKSSettings.ini, 1, Keys, %A_Space%
-IniRead, PauseKeyTemp, CKSSettings.ini , 1, PauseKey, #p
-
-
-if( !FileExist("CKS-E_Defaults.ini")  ){
-    MsgBox,, First Time Use, It looks like you're using CKS-E for the first time. Setting some defaults. Please read the help to get started."
-}
-
-GuiControl,, SecToRef, %SecToRefTemp%||
-GuiControl,, OutputIntervalLow, %RealOutputIntervalLow%||
-GuiControl,, OutputIntervalHigh, %RealOutputIntervalHigh%||
-GuiControl,, KeypressLengthLow, %RealKeypressLengthLow%||
-GuiControl,, KeypressLengthHigh, %RealKeypressLengthHigh%||
-GuiControl,, KeypressLengthHigh, %RealKeypressLengthHigh%||
-GuiControl,, Keys, %KeysTemp%
-GuiControl,, PauseKey, %PauseKeyTemp%
 
 ;Set up an error handler (this is optional)
 AHKsock_ErrorHandler("AHKsockErrors")
@@ -108,8 +90,6 @@ iPeerSocket := -1
 
 idList := object()
 Refresh(idList)
-OldPause := PauseKeyTemp
-Hotkey, %PauseKeyTemp%, PauseListen
 Seq := 0
 Timer := 0
 NextAllowedOutputTime := 0
@@ -118,10 +98,42 @@ IsConnected := False
 IsConnecting := False
 clientSocket := -1
 windowName := "CKS-E"
-Gui, Show,, %windowName%
+
 Gui, Submit, NoHide
+Gui, Show,, %windowName%
+
+If( !FileExist(DefaultConfigFile)  ){
+    MsgBox,, First Time Use, It looks like you're using CKS-E for the first time. Setting some defaults. Please read the help to get started."
+	
+	GuiControl,, CBOutputIntervalLow, 0.5||
+	GuiControl,, CBOutputIntervalHigh, 1.0||
+	GuiControl,, CBKeypressLengthLow, 0.3||
+	GuiControl,, CBKeypressLengthHigh, 0.6||
+	GuiControl,, PauseKey, #p
+	ApplyIntervals()
+}Else{
+	LoadConfig( DefaultConfigFile )
+}
+
+OldPause := PauseKey
+Hotkey, %PauseKey%, PauseListen
+
 JoyPadAxes := Object()
 Return
+
+LoadProfile(){
+	FileSelectFile, SelectedFile, 3, , Open a file, ini files (*.ini)
+	If( SelectedFile <> "" ){
+		LoadConfig(SelectedFile)
+	}
+}
+
+SaveProfile(){
+	FileSelectFile, SelectedFile, S, , Save To File, ini files (*.ini)
+	If( SelectedFile <> "" ){
+		SaveConfig(SelectedFile)
+	}
+}
 
 SetJoyPadListening( OnOrOff ){
 	Global JoyPadAxes
@@ -316,13 +328,16 @@ OnPause(){
 }
 
 AboutBox(){
-	txtVar := "CKS-E is a tool for duplicating or remapping user input and sending it to one or more applications on your PC. For example, CKS-E could allow you to send a key to perform repetitive crafting actions on an MMO character when you move your mouse while photo-editing or for each key you press while you type a report. CKS-E is based on the Consortium Key Sender by Pliaksi as originally published on the Consortium Gold Forums."
-	msgbox ,,Help, %txtVar%
+	Global
+	
+	txtVar := Format("CKS-E version {1}`n`nCKS-E is a tool that can be configured to listen for various user inputs and send keypresses to one or more applications on your PC based on that input. For example, CKS-E could allow you to send a key to perform repetitive crafting actions on an MMO character when you move your mouse while photo-editing, for each key you press while you type a report or when you use your joypad when playing another game. CKS-E is based on the Consortium Key Sender by Pliaksi as originally published on the Consortium Gold Forums.`n`nHomepage: https://github.com/ootsby/CKS-E", APP_VERSION)
+	
+	msgbox ,,About, %txtVar%
 	Return
 }
 
 HelpListen(){
-	txtVar := "Fill in usage info here"
+	txtVar := "Err... Look at the homepage for now: https://github.com/ootsby/CKS-E"
 	msgbox ,,Help, %txtVar%
 	Return
 }
@@ -452,7 +467,7 @@ IsCheckboxStyle(style)
 	Return False	
 }
 
-SaveConfig()
+SaveConfig( ConfigFileName )
 {
 	Global
 	HWND := WinExist(windowName)
@@ -471,10 +486,45 @@ SaveConfig()
 			GuiControlGet, varName, Name, %a_LoopField%
 							
 			GuiControlGet, controlValue, , %varName%
-			IniWrite, %controlValue%, test.ini , 1, %varName%
+			IniWrite, %controlValue%, %ConfigFileName% , 1, %varName%
 			
 		}
 	}
+}
+
+LoadConfig( ConfigFileName )
+{
+	Global
+	HWND := WinExist(windowName)
+	WinGet, ctlList, ControlList, ahk_id %HWND%
+	Loop, Parse, ctlList,`n 
+	{
+		isCheckbox := False
+		
+		If( inStr(a_LoopField,"Button") ){
+			ControlGet, styleFlags, Style, , %a_LoopField%
+			isCheckBox := IsCheckboxStyle(styleFlags)
+		}
+		
+		If( inStr(a_LoopField,"Edit") or isCheckbox ){
+			
+			GuiControlGet, varName, Name, %a_LoopField%
+							
+			IniRead, temp, %ConfigFileName%, 1, %varName%
+			StringLeft, cbTest, varName, 2
+			; This is horrible but there seems to be no easy way to either detect when a ui element is a combobox
+			; or to set the value in the edit box element of the combox box. So, I've had to use "special naming"
+			; and a method that adds the value as the new default in the combobox.
+			If( cbTest = "CB" ){
+				GuiControl,, %varName%, %temp%||
+			}Else{
+				GuiControl,, %varName%, %temp%
+			}
+		}
+	}
+	Gui Submit, NoHide
+	
+	ApplyIntervals()
 }
 
 Close(){
@@ -484,23 +534,16 @@ Close(){
 FinaliseAndExit(){
 	Global
 	Gui submit, NoHide
-	SaveConfig()
-	IniWrite, %SecToRef%, CKSSettings.ini , 1, SecToRef
-	IniWrite, %RealOutputIntervalLow%, CKSSettings.ini , 1, OutputIntervalLow
-	IniWrite, %RealOutputIntervalHigh%, CKSSettings.ini , 1, OutputIntervalHigh
-	IniWrite, %RealKeypressLengthLow%, CKSSettings.ini , 1, KeypressLengthLow
-	IniWrite, %RealKeypressLengthHigh%, CKSSettings.ini , 1, KeypressLengthHigh
-	IniWrite, %Keys%, CKSSettings.ini , 1, Keys
-	IniWrite, %PauseKey%, CKSSettings.ini , 1, PauseKey
+	SaveConfig(DefaultConfigFile)
 	ExitApp
 }
 
 doSend(){
-	Global Keys, Seq, SequenceEnabled, RealOutputIntervalLow, RealOutputIntervalHigh, RandEnabled, NextAllowedOutputTime
+	Global Keys, Seq, SequenceEnabled, RealCBOutputIntervalLow, RealCBOutputIntervalHigh, RandEnabled, NextAllowedOutputTime
 	
 	If( A_TickCount >= NextAllowedOutputTime ){
 		sendKeys(Keys, Seq++, SequenceEnabled)
-		sleepSpecial(RealOutputIntervalLow, RealOutputIntervalHigh, RandEnabled)
+		sleepSpecial(RealCBOutputIntervalLow, RealCBOutputIntervalHigh, RandEnabled)
 	}
 }
 
@@ -534,27 +577,27 @@ Refresh(idList) {
     LV_ModifyCol(3,"Auto")
 }
 
-sleepSpecial(OutputIntervalLow, OutputIntervalHigh, RandEnabled){
+sleepSpecial(CBOutputIntervalLow, CBOutputIntervalHigh, RandEnabled){
 	
 	Global NextAllowedOutputTime
 	
-    If (OutputIntervalHigh < OutputIntervalLow or OutputIntervalHigh ="" or OutputIntervalLow="") {
-        OutputIntervalLow := 2000
-        OutputIntervalHigh := 3000
-        GuiControl,,OutputIntervalLow,2||
-        GuiControl,,OutputIntervalHigh,3||
+    If (CBOutputIntervalHigh < CBOutputIntervalLow or CBOutputIntervalHigh ="" or CBOutputIntervalLow="") {
+        CBOutputIntervalLow := 2000
+        CBOutputIntervalHigh := 3000
+        GuiControl,,CBOutputIntervalLow,2||
+        GuiControl,,CBOutputIntervalHigh,3||
     } else {
-        OutputIntervalLow *=1000
-        OutputIntervalHigh *=1000
+        CBOutputIntervalLow *=1000
+        CBOutputIntervalHigh *=1000
     }
 
-    Random, rand, OutputIntervalLow, OutputIntervalHigh
+    Random, rand, CBOutputIntervalLow, CBOutputIntervalHigh
     NextAllowedOutputTime := A_TickCount + rand
     Return rand
 }
 
 sendKeys(Keys, Sequence, SEnabled){
-	Global IsConnected,clientSocket, RealKeypressLengthHigh, RealKeypressLengthLow, KeypressEmulationEnabled
+	Global IsConnected,clientSocket, RealCBKeypressLengthHigh, RealCBKeypressLengthLow, KeypressEmulationEnabled
 	
 	If( IsConnected ){
 		dummyData := 1
@@ -604,7 +647,7 @@ sendKeys(Keys, Sequence, SEnabled){
 	
 	; If keypress emulation is enabled then sleep and then send the key up even to each checked application
 	If( KeypressEmulationEnabled ){
-		Random, rand, RealKeypressLengthLow*1000, RealKeypressLengthHigh*1000
+		Random, rand, RealCBKeypressLengthLow*1000, RealCBKeypressLengthHigh*1000
 		Sleep, rand
 		Loop{
 			RowNumber := LV_GetNext(RowNumber,"Checked")  
@@ -753,10 +796,10 @@ ApplyIntervals(){
 	Global
 	Gui submit, NoHide
 	
-	GuiControlGet, RealKeypressLengthLow, ,KeypressLengthLow
-	GuiControlGet, RealKeypressLengthHigh, ,KeypressLengthHigh
-	GuiControlGet, RealOutputIntervalLow, ,OutputIntervalLow
-	GuiControlGet, RealOutputIntervalHigh, ,OutputIntervalHigh
+	GuiControlGet, RealCBKeypressLengthLow, ,CBKeypressLengthLow
+	GuiControlGet, RealCBKeypressLengthHigh, ,CBKeypressLengthHigh
+	GuiControlGet, RealCBOutputIntervalLow, ,CBOutputIntervalLow
+	GuiControlGet, RealCBOutputIntervalHigh, ,CBOutputIntervalHigh
 	
 	GuiControl, Disable, ApplyIntervals 
 }
@@ -766,10 +809,10 @@ IntervalsUpdated(){
 	Global
 	Gui submit, NoHide
 	
-	GuiControlGet, KPIL,,KeypressLengthLow
-	GuiControlGet, KPIH,,KeypressLengthHigh
-	GuiControlGet, OIL,,OutputIntervalLow
-	GuiControlGet, OIH,,OutputIntervalHigh
+	GuiControlGet, KPIL,,CBKeypressLengthLow
+	GuiControlGet, KPIH,,CBKeypressLengthHigh
+	GuiControlGet, OIL,,CBOutputIntervalLow
+	GuiControlGet, OIH,,CBOutputIntervalHigh
 	
 	KPILError := False
 	KPIHError := False
@@ -804,24 +847,24 @@ IntervalsUpdated(){
 	}
 	
 	if( OILError ){ 
-		GuiControl Show, OutputIntervalLowError
+		GuiControl Show, CBOutputIntervalLowError
 	}else{
-		GuiControl Hide, OutputIntervalLowError
+		GuiControl Hide, CBOutputIntervalLowError
 	}
 	if( OIHError ){
-		GuiControl Show, OutputIntervalHighError
+		GuiControl Show, CBOutputIntervalHighError
 	}else{
-		GuiControl Hide, OutputIntervalHighError
+		GuiControl Hide, CBOutputIntervalHighError
 	}
 	if( KPILError ){
-		GuiControl Show, KeypressLengthLowError
+		GuiControl Show, CBKeypressLengthLowError
 	}else{
-		GuiControl Hide, KeypressLengthLowError
+		GuiControl Hide, CBKeypressLengthLowError
 	}
 	if( KPIHError ){
-		GuiControl Show, KeypressLengthHighError
+		GuiControl Show, CBKeypressLengthHighError
 	}else{
-		GuiControl Hide, KeypressLengthHighError
+		GuiControl Hide, CBKeypressLengthHighError
 	}
 	
 	If( KPIHError Or KPILError Or OILError Or OIHError ){

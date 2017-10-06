@@ -525,6 +525,10 @@ LoadConfig( ConfigFileName )
 	Gui Submit, NoHide
 	
 	ApplyIntervals()
+	PhsToggle()
+	MouseToggle()
+	JoyPadToggle()
+	KbdToggle()
 }
 
 Close(){

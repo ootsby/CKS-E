@@ -33,6 +33,8 @@ I'm not hiding the origin of the application. I've included an attribution and a
 
 **General**
 
+In case you can't find the download link, it's here: https://github.com/ootsby/CKS-E/releases. Finding the link or reading this far is the first test of alpha participation. Congrats.
+
 This is an alpha. That means it's mostly working but not a finished release. I'm putting it out for user testing and feedback. So: 
 
 * Do expect some issues and rough edges. 

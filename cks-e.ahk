@@ -54,7 +54,7 @@ Gui Add, Text, cRed x560 y48 Hidden vCBKeypressLengthLowError, !
 Gui Add, ComboBox, vCBKeypressLengthLow gIntervalsUpdated x568 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
 Gui Add, Text, cRed x664 y48 Hidden vCBKeypressLengthHighError, !
 Gui Add, ComboBox, vCBKeypressLengthHigh gIntervalsUpdated x672 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
-Gui Add, Edit, vServerPort gServerPortUpdated x520 y160 w72 h21, 27001
+Gui Add, Edit, vServerPort gServerPortUpdated x520 y160 w72 h21, 29999
 Gui Add, Text, x512 y128 w80 h24 +0x200, Server Port
 Gui Add, CheckBox, vServerModeEnabled gServerModeUpdated x608 y160 w120 h23, Act As Server
 Gui Add, Button, vConnectText gConnectButton x744 y160 w83 h24, Connect

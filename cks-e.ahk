@@ -28,7 +28,7 @@
 #InstallMouseHook
 #MaxHotKeysPerInterval 10000
 
-APP_VERSION := "0.1 alpha"
+APP_VERSION := "0.1.0-alpha"
 
 Gui Add, CheckBox, vMouseEnabled gMouseToggle x24 y8 w150 h20, Listen to mouse
 Gui Add, CheckBox, vKbdEnabled gKbdToggle x24 y40 w171 h20, Listen to keyboard

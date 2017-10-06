@@ -330,7 +330,7 @@ OnPause(){
 AboutBox(){
 	Global
 	
-	txtVar := Format("CKS-E version {1}`n`nCKS-E is a tool that can be configured to listen for various user inputs and send keypresses to one or more applications on your PC based on that input. For example, CKS-E could allow you to send a key to perform repetitive crafting actions on an MMO character when you move your mouse while photo-editing, for each key you press while you type a report or when you use your joypad when playing another game. CKS-E is based on the Consortium Key Sender by Pliaksi as originally published on the Consortium Gold Forums.`n`nHomepage: https://github.com/ootsby/CKS-E", APP_VERSION)
+	txtVar := Format("CKS-E version {1}`n`nCKS-E is a tool that can be configured to listen for various user inputs and send keypresses to one or more applications on your PC based on that input. For example, CKS-E could allow you to send a key to perform repetitive crafting actions on an MMO character when you move your mouse while photo-editing, for each key you press while you type a report or when you use your joypad when playing another game. `n`nHomepage: https://github.com/ootsby/CKS-E`n`nCKS-E is based on the Consortium Key Sender by Pliaksi:`n http://stormspire.net/tools-programs-and-spreadsheets/3828-consortium-key-sender-cks.html`n`nCKS-E uses AHKSock by TheGood:`n https://autohotkey.com/board/topic/53827-ahksock-a-simple-ahk-implementation-of-winsock-tcpip/", APP_VERSION)
 	
 	msgbox ,,About, %txtVar%
 	Return

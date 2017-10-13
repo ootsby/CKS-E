@@ -31,6 +31,7 @@
 APP_VERSION := "0.1.0-alpha"
 
 Gui Add, CheckBox, vMouseEnabled gMouseToggle x24 y8 w150 h20, Listen to mouse
+Gui Add, CheckBox, vBlockOutput gBlockOutputToggle x216 y8 w135 h20, Block If In Window
 Gui Add, CheckBox, vKbdEnabled gKbdToggle x24 y40 w171 h20, Listen to keyboard
 Gui Add, CheckBox, vPhsEnabled gPhsToggle x24 y72 w170 h20, Listen to user input
 Gui Add, CheckBox, vJoypadEnabled gJoypadToggle x24 y104 w150 h20, Listen to joypad
@@ -257,6 +258,10 @@ KbdToggle(){
 }
 
 KeypressEmuToggle(){
+	Gui, Submit, NoHide
+}
+
+BlockOutputToggle(){
 	Gui, Submit, NoHide
 }
 
@@ -601,7 +606,7 @@ sleepSpecial(CBOutputIntervalLow, CBOutputIntervalHigh, RandEnabled){
 }
 
 sendKeys(Keys, Sequence, SEnabled){
-	Global IsConnected,clientSocket, RealCBKeypressLengthHigh, RealCBKeypressLengthLow, KeypressEmulationEnabled
+	Global BlockOutput, IsConnected, clientSocket, RealCBKeypressLengthHigh, RealCBKeypressLengthLow, KeypressEmulationEnabled
 	
 	If( IsConnected ){
 		dummyData := 1
@@ -628,6 +633,8 @@ sendKeys(Keys, Sequence, SEnabled){
 
     keyToSend := keyArr%rand%	
 	
+	MouseGetPos, , , winOverID
+	
 	; Send key to all checked applications
     Loop{
         RowNumber := LV_GetNext(RowNumber,"Checked")  
@@ -636,6 +643,10 @@ sendKeys(Keys, Sequence, SEnabled){
         
         LV_GetText(win_id, RowNumber,3)
 
+		If( BlockOutput And winOverID = win_id ){
+			Continue
+		}
+		
 		IfInString, keyToSend, mclick
 		{
 			Stringmid, keyToSend, keyToSend, 8

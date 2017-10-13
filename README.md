@@ -66,14 +66,14 @@ Inputs are treated as digital or analogue. Digital inputs are essentially button
   
 **Network Options**
 
-*Server IP/Port* - The IP is initialised to the detected IP of the first found network interface. Set the IP on the client to point at the server but be aware that the detected IP may not be the correct one if you have several network interfaces active. 
-*Act As Server* - Have this instance of CKS act as a... server!
+* Server IP/Port - The IP is initialised to the detected IP of the first found network interface. Set the IP on the client to point at the server but be aware that the detected IP may not be the correct one if you have several network interfaces active. 
+* Act As Server - Have this instance of CKS act as a... server!
 
 How To: 
 
 The client is the computer you want to by detecting your input. The server is the computer you want to be firing keys at another application. The client input listening is defined on the client and the server outputs will be defined by the settings on the server. Think of the client as sending a request just like an output keypress (so network requests will be sent as if they were keypresses to a local application and using the same timings) and the server as treating network requests the same as digital inputs.
 
-1. Set the port on client and server to the same number on an open port that isn't in use (I use 29999).
+1. Set the port on client and server to the same number on an open port that isn't in use. (I use 29999. This is apparently used as part of the data exchange protocol for IEC61850 in wind power plants so if you're running CKS-E in such an environment you might need to use a different port.)
 2. Set the client IP entry to the server's actual IP address.
 3. Check the "Act As Server" option on the server and click the button that should now say "Listen".
 4. Click the "Connect" button on the client.

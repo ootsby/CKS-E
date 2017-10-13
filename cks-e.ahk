@@ -534,6 +534,7 @@ LoadConfig( ConfigFileName )
 	MouseToggle()
 	JoyPadToggle()
 	KbdToggle()
+	ServerModeUpdated()
 }
 
 Close(){
@@ -700,6 +701,7 @@ HandleAsClient(sEvent, iSocket = 0, sName = 0, sAddr = 0, sPort = 0, ByRef bData
 		If (iSocket = -1) {
 			GuiControl ,, ConnectText, Connect
 			GuiControl,, AppStatus, Client connect failed...
+			EnableServerOptions()
 		}Else{
 			GuiControl,, AppStatus, Client connect success... socket = %iSocket%  
 			IsConnected := True
@@ -712,6 +714,7 @@ HandleAsClient(sEvent, iSocket = 0, sName = 0, sAddr = 0, sPort = 0, ByRef bData
 	If (sEvent = "DISCONNECTED") {
 		clientSocket := -1
 		IsConnected := False
+		EnableServerOptions()
 		GuiControl,, AppStatus, Client disconnected...
 		return
 	}
@@ -722,17 +725,23 @@ HandleAsClient(sEvent, iSocket = 0, sName = 0, sAddr = 0, sPort = 0, ByRef bData
 }
 
 DisableServerOptions(){
+	GuiControl, Disable, ServerIP
+	GuiControl, Disable, ServerPort
+	GuiControl, Disable, ServerModeEnabled
 }
 
 EnableServerOptions(){
+	GuiControl, Enable, ServerIP
+	GuiControl, Enable, ServerPort
+	GuiControl, Enable, ServerModeEnabled
 }
 
 ConnectButton(){
-	GuiControlGet, ConnectText
-	If( ConnectText = "Connect" or ConnectText = "Disconnect" ){
-		Connect()
-	}else{
+	Global
+	if( ServerModeEnabled ){
 		Listen()
+	}else{
+		Connect()
 	}
 }
 
@@ -757,6 +766,7 @@ Connect(){
 		IsConnecting := False
 		clientSocket := -1
 		GuiControl,, AppStatus, Disconnected ;Update status
+		EnableServerOptions()
 	}	
 }
 
@@ -790,11 +800,11 @@ AHKsockErrors(iError, iSocket) {
 
 ServerModeUpdated(){
 	Global
-	Gui submit, NoHide
+	Gui Submit, NoHide
 	if( ServerModeEnabled ){
-		GuiControl ,, Connect, &Listen
+		GuiControl ,, ConnectText, &Listen
 	}else{
-		GuiControl ,, Connect, &Connect
+		GuiControl ,, ConnectText, &Connect
 	}
 }
 

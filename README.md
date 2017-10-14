@@ -58,6 +58,7 @@ Inputs are treated as digital or analogue. Digital inputs are essentially button
 
 **Output Options**
 
+* Block If In Window - If this is checked then no output will be sent if the user's mouse cursor is in the target application window. Useful if you're triggering ouput that interferes with normal use and want to alt-tab to and use the application without turning CKS-E off everytime.
 * Output Intervals - Sets the gap between allowed output periods in seconds. Output will be allowed at a random point between the low and high values.
 * Keypress Length - Sets the time between the Key Down and Key Up events if the emulation option is ticked. Also randomly picked between the low and high values in seconds.
 * Keys to Send - Accepts a semi-colon delimited list of SINGLE keys. Non-printable keys should written out as with CKS but without the curly braces: e.g "1;2;3;4;5;6;Space". Very much open to discussion about how people want/need to use this.

@@ -30,39 +30,44 @@
 
 APP_VERSION := "0.1.0-alpha"
 
-Gui Add, CheckBox, vMouseEnabled gMouseToggle x24 y8 w150 h20, Listen to mouse
-Gui Add, CheckBox, vBlockOutput gBlockOutputToggle x216 y8 w135 h20, Block If In Window
-Gui Add, CheckBox, vKbdEnabled gKbdToggle x24 y40 w171 h20, Listen to keyboard
-Gui Add, CheckBox, vPhsEnabled gPhsToggle x24 y72 w170 h20, Listen to user input
-Gui Add, CheckBox, vJoypadEnabled gJoypadToggle x24 y104 w150 h20, Listen to joypad
-Gui Add, CheckBox, vMimic gMimicToggle x216 y40 w135 h20, Mirror Keys
-Gui Add, CheckBox, vSequenceEnabled x824 y78 w133 h20, Send In Sequence
-Gui Add, CheckBox, vKeypressEmulationEnabled gKeypressEmuToggle x824 y98 w133 h20, Emulate KeyDown/Up
-Gui Add, Button, gRefreshList x864 y152 w94 h33, Refresh
-Gui Add, Text, x136 y160 w74 h20, Pause Key
-Gui Add, Button, gPauseListen x24 y152 w94 h33, Pause
-Gui Add, Edit, vPauseKey gPauseKeyChanged x256 y160 w79 h24, #p
-Gui Add, Text, x430 y10 w123 h20, Output Interval
-Gui Add, Text, cRed x560 y8 Hidden CBOutputIntervalLowError, !
-Gui Add, ComboBox, vCBOutputIntervalLow gIntervalsUpdated x568 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10
-Gui Add, Text, cRed x664 y8 Hidden CBOutputIntervalHighError, !
-Gui Add, ComboBox, vCBOutputIntervalHigh gIntervalsUpdated x672 y8 w79, 0.2|0.3|0.5|0.75|1|1.5|2|3|4|5|10
-Gui Add, Text, x430 y88 w96 h20, Keys to send
-Gui Add, Edit, vKeys x568 y88 w235 h23, 1
-Gui Add, ListView, vProgramList gProgramList x24 y240 w938 h469 Checked SortDesc xm, Name|Class|ID
-Gui Add, Text, x410 y50 w145 h20, KeyPress Length
-Gui Add, Text, cRed x560 y48 Hidden vCBKeypressLengthLowError, !
-Gui Add, ComboBox, vCBKeypressLengthLow gIntervalsUpdated x568 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
-Gui Add, Text, cRed x664 y48 Hidden vCBKeypressLengthHighError, !
-Gui Add, ComboBox, vCBKeypressLengthHigh gIntervalsUpdated x672 y48 w79, 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0
-Gui Add, Edit, vServerPort gServerPortUpdated x520 y160 w72 h21, 29999
-Gui Add, Text, x512 y128 w80 h24 +0x200, Server Port
-Gui Add, CheckBox, vServerModeEnabled gServerModeUpdated x608 y160 w120 h23, Act As Server
-Gui Add, Button, vConnectText gConnectButton x744 y160 w83 h24, Connect
-Gui Add, Text, x368 y128 w80 h23 +0x200, Server IP
-Gui Add, Edit, vServerIP gServerIPUpdated x368 y160 w120 h21, %A_IPAddress1%
-Gui Add, Button, gApplyIntervals vApplyIntervals x792 y16 w80 h39 Disabled, Apply Intervals
-Gui Add, Text, vAppStatus x24 y200 w935 h23 +0x200 Center, Status Line
+OutputIntervalBaseList := "0.2|0.3|0.4|0.5|0.75|1|1.5|2|3|4|5|10"
+KeypressIntervalBaseList := "0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9|1.0"
+
+
+Gui Add, CheckBox, vMouseEnabled gMouseToggle x24 y8 w102 h20, Listen to mouse
+Gui Add, CheckBox, vBlockOutput gBlockOutputToggle x208 y8 w135 h20, Block If In Window
+Gui Add, CheckBox, vKbdEnabled gKbdToggle x24 y32 w112 h20, Listen to keyboard
+Gui Add, CheckBox, vPhsEnabled gPhsToggle x24 y56 w116 h20, Listen to user input
+Gui Add, CheckBox, vJoypadEnabled gJoypadToggle x24 y80 w102 h20, Listen to joypad
+Gui Add, CheckBox, vMimic gMimicToggle x208 y32 w135 h20, Mirror Keys
+Gui Add, CheckBox, vSequenceEnabled x352 y8 w133 h20, Send In Sequence
+Gui Add, CheckBox, vKeypressEmulationEnabled gKeypressEmuToggle x352 y32 w133 h20, Emulate Key Down/Up
+Gui Add, Button, gRefreshList x16 y152 w94 h33, Refresh
+Gui Add, Text, x736 y112 w57 h20, Pause Key
+Gui Add, Button, gPauseListen x744 y152 w94 h33, Pause
+Gui Add, Edit, vPauseKey gPauseKeyChanged x800 y112 w33 h18, #p
+Gui Add, Text, x520 y40 w81 h20 Right, Output Interval
+Gui Add, Text, x608 y40 w3 h13 cRed Hidden vCBOutputIntervalLowError, !
+Gui Add, ComboBox, vCBOutputIntervalLow gIntervalsUpdated x616 y40 w54, %OutputIntervalBaseList%
+Gui Add, Text, x680 y40 w3 h13 cRed Hidden vCBOutputIntervalHighError, !
+Gui Add, ComboBox, vCBOutputIntervalHigh gIntervalsUpdated x688 y40 w56, %OutputIntervalBaseList%
+Gui Add, Text, x528 y8 w70 h20 Right, Keys to Send
+Gui Add, Edit, vKeys x616 y8 w215 h20, 1
+Gui Add, ListView, vProgramList gProgramList x16 y192 w822 h469 Checked SortDesc, Name|Class|ID
+Gui Add, Text, x512 y72 w89 h20 Right, Keypress Length
+Gui Add, Text, vCBKeypressLengthLowError x608 y72 w3 h13 cRed Hidden, !
+Gui Add, ComboBox, vCBKeypressLengthLow gIntervalsUpdated x616 y72 w55, %KeypressIntervalBaseList%
+Gui Add, Text, vCBKeypressLengthHighError x680 y72 w3 h13 cRed Hidden, !
+Gui Add, ComboBox, vCBKeypressLengthHigh gIntervalsUpdated x688 y72 w56, %KeypressIntervalBaseList%
+Gui Add, Edit, vServerPort gServerPortUpdated x424 y112 w72 h20, 29999
+Gui Add, Text, x424 y88 w61 h22 +0x200, Port
+Gui Add, CheckBox, vServerModeEnabled gServerModeUpdated x208 y72 w84 h23, Act As Server
+Gui Add, Button, vConnectText gConnectButton x208 y112 w83 h20, Connect
+Gui Add, Text, x320 y88 w80 h21 +0x200, Server IP
+Gui Add, Edit, vServerIP gServerIPUpdated x320 y112 w97 h20, %A_IPAddress1%
+Gui Add, Button, vApplyIntervals gApplyIntervals x752 y48 w80 h39 Disabled, Apply Intervals
+Gui Add, Text, vAppStatus x118 y160 w617 h22 +0x200 Center  +Border, Status Line
+
 
 Menu, FileMenu, Add, LoadProfile, LoadProfile
 Menu, FileMenu, Add, SaveProfile, SaveProfile
@@ -475,6 +480,9 @@ IsCheckboxStyle(style)
 SaveConfig( ConfigFileName )
 {
 	Global
+	
+	ResetIntervals()
+	
 	HWND := WinExist(windowName)
 	WinGet, ctlList, ControlList, ahk_id %HWND%
 	Loop, Parse, ctlList,`n 
@@ -591,15 +599,8 @@ sleepSpecial(CBOutputIntervalLow, CBOutputIntervalHigh, RandEnabled){
 	
 	Global NextAllowedOutputTime
 	
-    If (CBOutputIntervalHigh < CBOutputIntervalLow or CBOutputIntervalHigh ="" or CBOutputIntervalLow="") {
-        CBOutputIntervalLow := 2000
-        CBOutputIntervalHigh := 3000
-        GuiControl,,CBOutputIntervalLow,2||
-        GuiControl,,CBOutputIntervalHigh,3||
-    } else {
-        CBOutputIntervalLow *=1000
-        CBOutputIntervalHigh *=1000
-    }
+    CBOutputIntervalLow *=1000
+    CBOutputIntervalHigh *=1000
 
     Random, rand, CBOutputIntervalLow, CBOutputIntervalHigh
     NextAllowedOutputTime := A_TickCount + rand
@@ -817,6 +818,19 @@ ServerIPUpdated(){
 }
 
 
+ResetIntervals(){
+	Global
+
+	CBKeypressLengthLow := RealCBKeypressLengthLow
+	CBKeypressLengthHigh := RealCBKeypressLengthHigh
+	CBOutputIntervalLow := RealCBOutputIntervalLow
+	CBOutputIntervalHigh := RealCBOutputIntervalHigh
+	GuiControl,,CBOutputIntervalLow,|%OutputIntervalBaseList%|%RealCBOutputIntervalLow%||
+	GuiControl,,CBOutputIntervalHigh,|%OutputIntervalBaseList%|%RealCBOutputIntervalHigh%||
+	GuiControl,,CBKeypressLengthLow,|%KeypressIntervalBaseList%|%RealCBKeypressLengthLow%||
+	GuiControl,,CBKeypressLengthHigh,|%KeypressIntervalBaseList%|%RealCBKeypressLengthHigh%||
+}
+
 ApplyIntervals(){
 	Global
 	Gui submit, NoHide
@@ -825,6 +839,8 @@ ApplyIntervals(){
 	GuiControlGet, RealCBKeypressLengthHigh, ,CBKeypressLengthHigh
 	GuiControlGet, RealCBOutputIntervalLow, ,CBOutputIntervalLow
 	GuiControlGet, RealCBOutputIntervalHigh, ,CBOutputIntervalHigh
+	
+	ResetIntervals()
 	
 	GuiControl, Disable, ApplyIntervals 
 }

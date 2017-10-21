@@ -44,7 +44,7 @@ Gui Add, CheckBox, vSequenceEnabled x352 y8 w133 h20, Send In Sequence
 Gui Add, CheckBox, vKeypressEmulationEnabled gKeypressEmuToggle x352 y32 w133 h20, Emulate Key Down/Up
 Gui Add, Button, gRefreshList x16 y152 w94 h33, Refresh
 Gui Add, Text, x736 y112 w57 h20, Pause Key
-Gui Add, Button, gPauseListen x744 y152 w94 h33, Pause
+Gui Add, Button, vPauseButton gPauseListen x744 y152 w94 h33, Pause
 Gui Add, Edit, vPauseKey gPauseKeyChanged x800 y112 w33 h18, #p
 Gui Add, Text, x520 y40 w81 h20 Right, Output Interval
 Gui Add, Text, x608 y40 w3 h13 cRed Hidden vCBOutputIntervalLowError, !
@@ -99,6 +99,7 @@ Refresh(idList)
 Seq := 0
 Timer := 0
 NextAllowedOutputTime := 0
+IsPaused := False
 IsListening := False
 IsConnected := False
 IsConnecting := False
@@ -305,36 +306,25 @@ PhsListen(){
 	
 	DetectPeriod := 50
 	
-	while (PhsEnabled)
-	{
-		if (A_TimeIdlePhysical < DetectPeriod){ 
+	If(PhsEnabled){
+		if (A_TimeIdlePhysical < 50){ 
 			doSend()
 		}
-		Sleep, DetectPeriod
+		SetTimer, , -50
+	}Else{
+		SetTimer, , Off
 	}
-	Return
 }
 
 PauseListen(){
 	Global
-	if IsPaused
-	{
-	   Pause off
-	   IsPaused := false
+	If( IsPaused ){
+	   IsPaused := False
 	   GuiControl,, PauseButton, Pause
+	}Else{
+		IsPaused := True
+		GuiControl,, PauseButton, Unpause
 	}
-	else
-	   SetTimer, OnPause, 10
-	Return
-}
-
-OnPause(){
-	Global
-	SetTimer, OnPause, off
-	IsPaused := true
-	GuiControl,, PauseButton, Unpause
-	Pause, on
-	Return
 }
 
 AboutBox(){
@@ -368,7 +358,7 @@ JoyPadToggle(){
 JoyPadListen(){
 	Global IsPaused, JoyPadEnabled, JoyPadAxes
 	
-	While( JoyPadEnabled ){
+	If( JoyPadEnabled ){
 		
 		JoyPadMoved := False
 		
@@ -385,11 +375,13 @@ JoyPadListen(){
 			}
 		}
 		
-		If( JoyPadMoved and !IsPaused ){
+		If( JoyPadMoved ){
 			doSend()
 		}
 		
-		Sleep, 50
+		SetTimer, , -50
+	}else{
+		SetTimer, , Off
 	}
 }
 
@@ -401,16 +393,14 @@ MouseToggle(){
 	if( MouseEnabled ){
 		SetTimer, MouseListen, -0
 	}
-	Return
 }
 
 OnMouseInput(){
-	Global IsPaused, MouseEnabled
+	Global MouseEnabled
 	
-	if( !IsPaused and MouseEnabled ){
+	if( MouseEnabled ){
 		doSend()
 	}
-	Return
 }
 
 $~WheelUp::
@@ -423,10 +413,13 @@ Return
 
 MouseListen(){
 	Global MouseEnabled
+	static xPos := -1, yPos := -1
 	
-	MouseGetPos, xPos, yPos
+	If( MouseEnabled ){
 	
-	while( MouseEnabled ){
+		if( xPos = -1 ){
+			MouseGetPos, xPos, yPos
+		}
 	
 		MouseGetPos, xPosNew, yPosNew
 		
@@ -436,7 +429,9 @@ MouseListen(){
 			OnMouseInput()
 		}
 	
-		Sleep, 50
+		SetTimer, MouseListen, -50
+	}Else{		
+		SetTimer, MouseListen, Off
 	}
 }
 
@@ -557,9 +552,9 @@ FinaliseAndExit(){
 }
 
 doSend(){
-	Global Keys, Seq, SequenceEnabled, RealCBOutputIntervalLow, RealCBOutputIntervalHigh, RandEnabled, NextAllowedOutputTime
+	Global IsPaused, Keys, Seq, SequenceEnabled, RealCBOutputIntervalLow, RealCBOutputIntervalHigh, RandEnabled, NextAllowedOutputTime
 	
-	If( A_TickCount >= NextAllowedOutputTime ){
+	If( !IsPaused And A_TickCount >= NextAllowedOutputTime ){
 		sendKeys(Keys, Seq++, SequenceEnabled)
 		sleepSpecial(RealCBOutputIntervalLow, RealCBOutputIntervalHigh, RandEnabled)
 	}

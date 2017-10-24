@@ -674,19 +674,19 @@ HandleAsServer(sEvent, iSocket = 0, sName = 0, sAddr = 0, sPort = 0, ByRef bData
     Global
 
 	If (sEvent = "ACCEPTED") {
-		GuiControl,, AppStatus, Client connected from %sAddr%...
+		GuiControl, , AppStatus, Client connected from %sAddr%...
         OutputDebug, % "A client with IP " sAddr " connected!"
 		return
 	}
 	
 	If( sEvent = "RECEIVED"){
 		FormatTime, TimeString, T12, Time
-		GuiControl,, AppStatus, Received press request. Firing keys at %TimeString%
+		GuiControl, , AppStatus, Received press request. Firing keys at %TimeString%
 		doSend()
 		return
 	}
 	
-	GuiControl,, AppStatus, Server received event %sEvent%... ;Update status
+	GuiControl, , AppStatus, Server received event %sEvent%... ;Update status
 }
 
 HandleAsClient(sEvent, iSocket = 0, sName = 0, sAddr = 0, sPort = 0, ByRef bData = 0, bDataLength = 0) {
@@ -695,11 +695,11 @@ HandleAsClient(sEvent, iSocket = 0, sName = 0, sAddr = 0, sPort = 0, ByRef bData
 	If (sEvent = "CONNECTED") {
 		IsConnecting := False
 		If (iSocket = -1) {
-			GuiControl ,, ConnectText, Connect
-			GuiControl,, AppStatus, Client connect failed...
+			GuiControl, , ConnectText, Connect
+			GuiControl, , AppStatus, Client connect failed...
 			EnableServerOptions()
 		}Else{
-			GuiControl,, AppStatus, Client connect success... socket = %iSocket%  
+			GuiControl, , AppStatus, Client connect success... socket = %iSocket%  
 			IsConnected := True
 		}
 		clientSocket := iSocket
@@ -745,15 +745,15 @@ Connect(){
 	Global
 	
 	If( !IsConnected && !IsConnecting ){
-		GuiControl,, AppStatus, Trying to connect to %serverIP%... ;Update status
+		GuiControl, , AppStatus, Trying to connect to %serverIP%... ;Update status
     	If( err := AHKsock_Connect(serverIP, serverPort, "HandleAsClient") ){
-			GuiControl,, AppStatus, AHKsock_Connect() failed with return value = %err% and ErrorLevel = %ErrorLevel%
+			GuiControl, , AppStatus, AHKsock_Connect() failed with return value = %err% and ErrorLevel = %ErrorLevel%
 			OutputDebug, % "AHKsock_Connect() failed with return value = " err " and ErrorLevel = " ErrorLevel
 			EnableServerOptions()
-			GuiControl ,, ConnectText, Connect
+			GuiControl, , ConnectText, Connect
 		}else{
 			DisableServerOptions()
-			GuiControl ,, ConnectText, Disconnect
+			GuiControl, , ConnectText, Disconnect
 			IsConnecting := True
 		}
 	}else{
@@ -761,7 +761,7 @@ Connect(){
 		IsConnected := False
 		IsConnecting := False
 		clientSocket := -1
-		GuiControl,, AppStatus, Disconnected ;Update status
+		GuiControl, , AppStatus, Disconnected ;Update status
 		EnableServerOptions()
 	}	
 }
@@ -771,20 +771,21 @@ Listen(){
 	if( !IsListening ){
 		If( err := AHKsock_Listen(serverPort, "HandleAsServer") ){
 			OutputDebug, % "AHKsock_Listen() failed with return value = " err " and ErrorLevel = " ErrorLevel
-			GuiControl,, AppStatus, Listen failed with return value = %err%... ;Update status
+			GuiControl, , AppStatus, Listen failed with return value = %err%... ;Update status
 			EnableServerOptions()
-			GuiControl ,, ConnectText, Listen
+			GuiControl, , ConnectText, Listen
 		}else{
 			DisableServerOptions()
-			GuiControl ,, ConnectText, StopListening
-			GuiControl,, AppStatus, Listening for connection on %serverPort%... ;Update status
+			GuiControl, , ConnectText, StopListening
+			GuiControl, , AppStatus, Listening for connection on %serverPort%... ;Update status
 			IsListening := True
 		}
 	}else{
-		GuiControl,, AppStatus, Stopped Listening... ;Update status
+		GuiControl, , AppStatus, Stopped Listening... ;Update status
 		EnableServerOptions()
-		GuiControl ,, ConnectText, Listen
-		AHKsock_Listen(serverPort)
+		GuiControl, , ConnectText, Listen
+		AHKsock_Listen(serverPort, False)
+		AHKsock_Close()
 		IsListening := False
 	}
 }
